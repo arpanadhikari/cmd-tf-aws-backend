@@ -13,9 +13,9 @@ resource "aws_kms_alias" "backend" {
 
 data "aws_iam_policy_document" "kms" {
   count = var.enable_customer_kms_key ? 1 : 0
+  
   statement {
     effect = "Allow"
-
     principals {
       identifiers = [
         "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
@@ -28,16 +28,19 @@ data "aws_iam_policy_document" "kms" {
 
   statement {
     effect = "Allow"
-
     principals {
-      identifiers = concat(aws_iam_role.backend_all[*].arn, values(aws_iam_role.backend_restricted)[*].arn)
-      type        = "AWS"
+      identifiers = concat(
+        aws_iam_role.backend_all[*].arn,
+        values(aws_iam_role.backend_restricted)[*].arn,
+        flatten(values(var.workspace_details))
+      )
+      type = "AWS"
     }
     actions = [
       "kms:Encrypt",
       "kms:Decrypt",
-      "kms:ReEncrypt",
-      "kms:GenerateDataKey",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
       "kms:DescribeKey"
     ]
     resources = ["*"]

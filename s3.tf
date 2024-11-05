@@ -26,7 +26,7 @@ resource "aws_s3_bucket" "backend" {
     rule {
       apply_server_side_encryption_by_default {
         sse_algorithm     = "aws:kms"
-        kms_master_key_id = var.enable_customer_kms_key ? aws_kms_key.backend[0].id : null
+        kms_master_key_id = var.enable_customer_kms_key ? aws_kms_key.backend[0].arn : null
       }
     }
   }

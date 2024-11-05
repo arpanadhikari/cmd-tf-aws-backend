@@ -15,7 +15,18 @@ data "aws_iam_policy_document" "backend_assume_role_all" {
 
 data "aws_iam_policy_document" "iam_role_policy_all" {
   statement {
-    actions   = ["s3:GetBucketVersioning", "s3:ListBucket"]
+    actions = [
+      "s3:GetBucketVersioning",
+      "s3:ListBucket",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetBucketPolicy",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketAcl",
+      "s3:GetBucketLocation",
+      "s3:GetBucketTagging",
+      "s3:GetBucketOwnershipControls",
+      "s3:GetBucketVersioning"
+    ]
     resources = ["arn:aws:s3:::${aws_s3_bucket.backend.id}"]
   }
 
@@ -27,6 +38,17 @@ data "aws_iam_policy_document" "iam_role_policy_all" {
   statement {
     actions   = ["dynamodb:DescribeTable", "dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
     resources = ["arn:aws:dynamodb:*:*:table/${var.resource_prefix}-terraform-lock"]
+  }
+
+  statement {
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    resources = var.enable_customer_kms_key ? [aws_kms_key.backend[0].arn] : []
   }
 }
 
@@ -47,7 +69,18 @@ data "aws_iam_policy_document" "iam_role_policy_restricted" {
   for_each = var.workspace_details
 
   statement {
-    actions   = ["s3:GetBucketVersioning", "s3:ListBucket"]
+    actions = [
+      "s3:GetBucketVersioning",
+      "s3:ListBucket",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetBucketPolicy",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketAcl",
+      "s3:GetBucketLocation",
+      "s3:GetBucketTagging",
+      "s3:GetBucketOwnershipControls",
+      "s3:GetBucketVersioning"
+    ]
     resources = ["arn:aws:s3:::${aws_s3_bucket.backend.id}"]
   }
 
@@ -59,5 +92,16 @@ data "aws_iam_policy_document" "iam_role_policy_restricted" {
   statement {
     actions   = ["dynamodb:DescribeTable", "dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem"]
     resources = ["arn:aws:dynamodb:*:*:table/${var.resource_prefix}-terraform-lock"]
+  }
+
+  statement {
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    resources = var.enable_customer_kms_key ? [aws_kms_key.backend[0].arn] : []
   }
 }
